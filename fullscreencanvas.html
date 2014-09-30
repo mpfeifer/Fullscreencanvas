@@ -3,10 +3,21 @@
 <head>
     <meta charset="utf-8" />
     <title>Fullscreen HTML5 canvas</title>
-    <link rel="stylesheet" href="fullscreencanvas.css" />    
+    <link rel="stylesheet" href="fullscreencanvas.css" />
+    <script>
+      var fscanvas;
+    </script>
 </head>
 <body>
-    <canvas id="canvasx" width="10" height="10"></canvas>
-    <script charset="utf-8" src="fullscreencanvas.js"></script>
+  <canvas id="canvasx" width="10" height="10"1></canvas>
+  <div id="buttoncontainer">
+    <form>
+      <input type="button" name="Reset" value="Reset" onclick="fscanvas.reset()"><br>
+      <input type="button" name="Randspots" value="Spots" onclick="fscanvas.addRandomSpots()"><br>
+      <input type="button" name="Undo" value="Undo" onclick="fscanvas.undo()">
+    </form>
+  </div>
+  <script charset="utf-8" src="fullscreencanvas.js"></script>
+</form>
 </body>
 </html>
