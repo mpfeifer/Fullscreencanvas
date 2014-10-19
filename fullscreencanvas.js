@@ -46,142 +46,28 @@
 
  */
 
-function BoundingBox() {
-    this.boundObj = undefined;
-}
-
-BoundingBox.prototype.setObject = function(obj_) {
-    this.boundObj = obj_;
-}
-
-BoundingBox.prototype.clear = function() {
-    this.boundObj = undefined;
-}
-
-BoundingBox.prototype.draw = function() {
-    if (this.boundObj) {
-	this.boundObj.drawBoundingBox();
-    }
-}
-
-function RandomSpot(canvas_, ctx_) {
-    this.ctx = ctx_;
-    this.canvas = canvas_;
-    this.maxRadius = 25;
-    this.x = -1;
-    this.y = -1;
-    this.radius = Math.floor(Math.random()*this.maxRadius);
-    this.colors = new Array();
-    this.colors.push("#28794C");
-    this.colors.push("#76B190");
-    this.colors.push("#4B956B");
-    this.colors.push("#105C31");
-    this.colors.push("#00411C");
-    this.colorIndex = Math.floor(Math.random()*this.colors.length);
-    
-    var tx = 50+Math.floor(Math.random()*(this.canvas.width-100));
-    var ty = 50+Math.floor(Math.random()*(this.canvas.height-100));
-    if (tx>=0 && ty>=0) {
-	this.x = tx;
-	this.y = ty;
-    }
-}
-
-RandomSpot.prototype.isClose = function (x_, y_) {
-    if (Math.abs(this.x-x_) <= this.radius && Math.abs(this.y-y_)<= this.radius) {
-	return 1;
-    }
-    else {
-	return 0;
-    }
-}
-
-RandomSpot.prototype.drawBoundingBox = function() {
-    if (this.y>=0 && this.y>=0) {
-	this.ctx.fillStyle = "#ff0000";
-	this.ctx.beginPath();
-	this.ctx.arc(this.x, this.y, this.maxRadius+1, 0, 2*Math.PI);
-	this.ctx.stroke();
-    }
-}
-
-RandomSpot.prototype.draw = function() {
-    if (this.y>=0 && this.y>=0) {
-	this.ctx.fillStyle = this.colors[this.colorIndex];
-	this.ctx.beginPath();
-	this.ctx.arc(this.x, this.y, this.radius, 0, 2*Math.PI);
-	this.ctx.fill();
-    }
-}
-
-function Clickmarker() {
-    this.ctx = undefined;
-
-    this.x = -1;
-    this.y = -1;
-    
-    this.color1 = "#AA7539";
-    this.color2 = "#AA5039";
-    this.color3 = "#29794C";
-}
-
-Clickmarker.prototype.setContext = function(ctx_) {
-    this.ctx = ctx_;
-}
-
-Clickmarker.prototype.drawBoundingBox = function() {
-    if (this.y>=0 && this.y>=0) {
-	this.ctx.fillStyle = "#ff0000";
-	this.ctx.beginPath();
-	this.ctx.arc(this.x, this.y, 18, 0, 2*Math.PI);
-	this.ctx.stroke();
-    }
-}
-
-Clickmarker.prototype.isClose = function (x_, y_) {
-    if (Math.abs(this.x-x_) <= 8 && Math.abs(this.y-y_)<= 8) {
-	return 1;
-    }
-    else {
-	return 0;
-    }
-}
-
-Clickmarker.prototype.draw = function() {
-    if (this.x >= 0 && this.y >= 0) {
-
-	this.ctx.fillStyle = this.color3;
-	this.ctx.beginPath();
-	this.ctx.arc(this.x, this.y, 15, 0, 2*Math.PI);
-	this.ctx.fill();
-	
-	this.ctx.fillStyle = this.color1;
-	this.ctx.beginPath();
-	this.ctx.arc(this.x, this.y, 10, 0, 2*Math.PI);
-	this.ctx.fill();
-
-	this.ctx.fillStyle = this.color2;
-	this.ctx.beginPath();
-	this.ctx.arc(this.x, this.y, 5, 0, 2*Math.PI);
-	this.ctx.fill();
-    }
-}
-
-Clickmarker.prototype.setX = function(x_) {
-    this.x = x_;
-}
-
-Clickmarker.prototype.setY = function(y_) {
-    this.y = y_;
-}
-
-Clickmarker.prototype.setCanvas = function(canvas_) {
-    this.canvas = canvas_;
-}
-
 function FullscreenCanvas(canvasname) {
 
-    this.canvas			 = document.getElementById(canvasname);
+    var bodyTag   = document.getElementsByTagName("body")[0];
+    var divTag    = document.createElement("div");
+    var canvasTag = document.createElement("canvas");
+
+    divTag.style.position	 = 'absolute';
+    divTag.style.left		 = 0;
+    divTag.style.top		 = 0;
+    divTag.style.margin		 = 0;
+    divTag.style.padding=0;
+    
+    canvasTag.style.position	 = 'absolute';
+    divTag.style.left		 = 0;
+    divTag.style.top		 = 0;
+    divTag.style.margin		 = 0;
+    divTag.style.padding	 = 0;
+    
+    divTag.appendChild(canvasTag);
+    bodyTag.appendChild(divTag);
+    
+    this.canvas			 = document.getElementsByTagName("canvas")[0];
     this.ctx			 = this.canvas.getContext("2d");
     this.blockSceneDrawing	 = 0;
     this.resizeTimeout           = 1500;
@@ -190,44 +76,21 @@ function FullscreenCanvas(canvasname) {
     this.bgcolor                 = "#27556C";
     this.xOffset                 = this.canvas.offsetLeft;
     this.yOffset                 = this.canvas.offsetTop;
-    this.markers                 = new Array();
-    this.randomSpots             = new Array();
-    this.maxNumSpots             = 50; // max number of new spots added
-    this.boundingBox             = new BoundingBox();
-    
+
     // take care for event handlers
-    window.addEventListener("resize", this.resizeHandler.bind(this));
     this.canvas.addEventListener("click", this.clickHandler.bind(this));
+    window.addEventListener("resize", this.resizeHandler.bind(this));
+
 
     this.drawScene();
 }
 
 FullscreenCanvas.prototype.drawScene = function() {
     if (this.blockSceneDrawing==0) {
+	this.ctx.clearRect ( 0 , 0 , this.canvas.width , this.canvas.height );	
 	// Draw background
 	this.ctx.fillStyle = this.bgcolor;
 	this.ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
-
-	this.boundingBox.draw();
-	
-	// Draw clickmarker
-	for(var i = 0; i < this.markers.length; i++) {
-	    this.markers[i].draw();
-	}
-
-	// Draw connectors
-	if (this.markers.length>1) {
-	    this.ctx.moveTo(this.markers[0].x, this.markers[0].y);
-	    for (var i=1; i<this.markers.length; i++) {
-		this.ctx.lineTo(this.markers[i].x, this.markers[i].y);
-	    }
-	    this.ctx.stroke();
-	}
-
-	// Draw Random Spots
-	for(var i = 0; i < this.randomSpots.length; i++) {
-	    this.randomSpots[i].draw();
-	}
     }
 }
 
@@ -236,52 +99,11 @@ FullscreenCanvas.prototype.sceneUnblocker = function() {
     this.drawScene();
 }
 
-FullscreenCanvas.prototype.reset = function() {
-    this.markers = new Array();
-    this.randomSpots = new Array();
-    this.boundingBox.clear();
-    this.drawScene();
-}
-
-FullscreenCanvas.prototype.undo = function() {
-    this.markers.pop();
-    this.drawScene();
-}
-
 FullscreenCanvas.prototype.clickHandler = function(event)  {
+
     var x = event.pageX - this.xOffset;
     var y = event.pageY - this.yOffset;
-
-    var marked = 0;
-
-    for(var i = 0; i < this.markers.length; i++) {
-	if (this.markers[i].isClose(x,y)) {
-	    marked = 1;
-	    this.boundingBox.setObject(this.markers[i]);
-	    break;
-	}
-    }
     
-    if (marked == 0) {
-	for(var i = 0; i < this.randomSpots.length; i++) {
-	    if (this.randomSpots[i].isClose(x,y)) {
-		marked=1;
-		this.boundingBox.setObject(this.randomSpots[i]);		
-		break;
-	    }
-	}
-    }
-    
-    if (marked == 0) {
-	this.boundingBox.clear();
-	var marker = new Clickmarker();
-	marker.setX(x);
-	marker.setY(y);
-	marker.setContext(this.ctx);
-	this.markers.push(marker);
-    }
-
-    this.ctx.clearRect ( 0 , 0 , this.canvas.width , this.canvas.height );
     this.drawScene();
 }
 
@@ -295,14 +117,4 @@ FullscreenCanvas.prototype.resizeHandler = function() {
     this.drawScene();
 }
 
-FullscreenCanvas.prototype.addRandomSpots = function() {
-    this.randomSpots = new Array();
-    var numSpots = Math.floor(Math.random()*this.maxNumSpots);
-    for(var i = 0; i < numSpots; i++) {
-	var newSpot = new RandomSpot(this.canvas, this.ctx);
-	this.randomSpots.push(newSpot);
-    }
-    this.drawScene();
-}
-
-fscanvas = new FullscreenCanvas('canvasx');
+var fscanvas = new FullscreenCanvas();
